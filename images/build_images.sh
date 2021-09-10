@@ -28,7 +28,7 @@ for KAFKA_VERSION in $KAFKA_VERSIONS
 do
     for SCALA_VERSION in $SCALA_VERSIONS
     do
-        DOCKER_TAG=$PRODUCT_VERSION"-"$KAFKA_VERSION
+        DOCKER_TAG=$PRODUCT_VERSION"-kafka-"$KAFKA_VERSION
         echo "Building image with name: strimzi/$PROJECT_NAME:$DOCKER_TAG $KAFKA_VERSION with $SCALA_VERSION)."
         docker build --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION -t strimzi/$PROJECT_NAME:$DOCKER_TAG $DOCKERFILE_DIR
     done
