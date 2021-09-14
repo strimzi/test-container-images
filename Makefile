@@ -15,7 +15,7 @@ docker_push:
 	echo "Pushing $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG) ..."
 	docker push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)
 
-prepare:
+prepare: clean
 	./images/download_kafka.sh
 
 clean:
