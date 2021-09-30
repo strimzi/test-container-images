@@ -8,12 +8,7 @@ DOCKER_VERSION_ARG ?= latest
 all: prepare docker_build docker_push clean
 
 docker_build:
-	echo "Building Docker images ..."
-	./images/build_images.sh $(DOCKER_VERSION_ARG) $(PROJECT_NAME) $(DOCKER_TAG) $(DOCKERFILE_DIR)
-
-docker_push:
-	echo "Pushing $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG) ..."
-	docker push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)
+	./images/build_push_images.sh $(DOCKER_VERSION_ARG) $(PROJECT_NAME) $(DOCKER_TAG) $(DOCKERFILE_DIR)
 
 prepare: clean
 	./images/download_kafka.sh

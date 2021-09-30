@@ -32,6 +32,7 @@ do
     echo "[INFO] Building images with following setup: DOCKER_VERSION_ARG=$DOCKER_VERSION_ARG, CURRENT_PROJECT=$CURRENT_PROJECT, DOCKER_TAG=$DOCKER_TAG, DOCKERFILE_DIR=$DOCKERFILE_DIR"
     echo "[INFO] Building image with name: strimzi/$CURRENT_PROJECT:$DOCKER_TAG $KAFKA_VERSION with $SCALA_VERSION)."
     docker build --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION -t strimzi/$CURRENT_PROJECT:$DOCKER_TAG $DOCKERFILE_DIR
+    docker push strimzi/$CURRENT_PROJECT:$(DOCKER_TAG)
 done
 
 
