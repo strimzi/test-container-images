@@ -1,8 +1,8 @@
-PROJECT_NAME=test-container-images
+PROJECT_NAME=test-kafka
 DOCKERFILE_DIR     ?= ./images
 DOCKER_REGISTRY    ?= quay.io
 DOCKER_ORG         ?= $(USER)
-DOCKER_TAG         ?= latest
+DOCKER_TAG         ?= main
 DOCKER_VERSION_ARG ?= latest
 
 all: prepare docker_build docker_push clean
