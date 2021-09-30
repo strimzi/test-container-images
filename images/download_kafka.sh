@@ -37,6 +37,7 @@ do
         echo "[INFO] SHA512SUMs are identical!"
     else
         echo "[ERROR] SHA512SUMs are not identical! Probably error during downloading..."
+        exit 1
     fi
 
     echo "[INFO] Extracting: "$KAFKA_VERSION" with $SCALA_VERSION."

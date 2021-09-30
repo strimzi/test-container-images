@@ -1,7 +1,7 @@
-PROJECT_NAME=test-kafka
+PROJECT_NAME=test-container
 DOCKERFILE_DIR     ?= ./images
 DOCKER_REGISTRY    ?= quay.io
-DOCKER_ORG         ?= test-container-images
+DOCKER_ORG         ?= strimzi-test-container
 DOCKER_TAG         ?= main
 DOCKER_VERSION_ARG ?= latest
 
