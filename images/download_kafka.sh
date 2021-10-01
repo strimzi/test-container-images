@@ -45,4 +45,4 @@ do
     mkdir -p $KAFKA_BINARIES_DIR && tar -xvzf $KAFKA_DOWNLOADED_TARS_DIR/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz -C $KAFKA_BINARIES_DIR
 done
 
-echo "Finished downloading..."
+echo "Finished downloading.."
