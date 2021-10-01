@@ -3,7 +3,7 @@
 #####
 # SUPPORTED KAFKA VERSIONS
 #####
-KAFKA_VERSIONS=$(cat supported_kafka.version)
+KAFKA_VERSIONS=$(cat supported_kafka.versions)
 
 #####
 # SUPPORTED SCALA VERSIONS
