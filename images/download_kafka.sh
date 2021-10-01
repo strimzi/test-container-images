@@ -21,7 +21,8 @@ SCALA_VERSION=$(cat supported_scala.version)
 for KAFKA_VERSION in $KAFKA_VERSIONS
 do
     echo "Downloading: "$KAFKA_VERSION" with $SCALA_VERSION."
-    KAFKA_URL="https://archive.apache.org/dist/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
+    KAFKA_URL="https://dlcdn.apache.org/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
+    echo $KAFKA_URL
     mkdir -p $KAFKA_DOWNLOADED_TARS_DIR && wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
     echo "kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
 
