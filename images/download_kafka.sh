@@ -8,7 +8,7 @@ KAFKA_DOWNLOADED_TARS_DIR="$IMAGES_DIR/kafka_tars"
 #####
 # SUPPORTED KAFKA VERSIONS
 #####
-KAFKA_VERSIONS=$(cat supported_kafka.version)
+KAFKA_VERSIONS=$(cat supported_kafka.versions)
 
 #####
 # SUPPORTED SCALA VERSIONS
