@@ -19,3 +19,19 @@ example:
 // download image with the 0.1.0 version and Kafka 3.0.0
 docker pull strimzi-test-container/test-container:0.1.0-kafka-3.0.0
 ````
+
+# How the image is built
+
+The build process is divided into 3 phases:
+1. Download Kafka binaries
+2. Next, we build for each Kafka version the same image but with different tag (i.e., `test-container:latest-kafka-3.0.0`, `test-container:latest-kafka-2.8.1`)
+```shell
+docker build --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION -t strimzi/$PROJECT_NAME:$CURRENT_TAG $DOCKERFILE_DIR
+```
+3. Eventually, we tag this image and then push it into the quay repository
+```shell
+// tag image
+docker tag strimzi/$PROJECT_NAME:$CURRENT_TAG $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
+// push image
+docker push $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
+```
