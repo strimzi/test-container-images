@@ -28,7 +28,7 @@ The build process is divided into 3 phases:
 ```shell
 docker build --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION -t strimzi/$PROJECT_NAME:$CURRENT_TAG $DOCKERFILE_DIR
 ```
-3. Eventually, we tag this image and then push it into the quay repository
+3. Eventually, we tag this image and then push it into the container repository
 ```shell
 // tag image
 docker tag strimzi/$PROJECT_NAME:$CURRENT_TAG $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
