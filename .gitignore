@@ -1,1 +1,4 @@
 .idea
+
+# MacOS related
+.DS_Store
