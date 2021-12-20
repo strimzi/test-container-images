@@ -11,7 +11,7 @@ docker_build:
 	./images/build_push_images.sh $(DOCKER_VERSION_ARG) $(PROJECT_NAME) $(DOCKERFILE_DIR)
 
 docker_tag_push:
-	./images/tag_push_images.sh $(PROJECT_NAME) $(REGISTRY) $(REGISTRY_ORGANIZATION) $(QUAY_USER) $(QUAY_PASS)
+	./images/tag_push_images.sh $(PROJECT_NAME) $(REGISTRY) $(REGISTRY_ORGANIZATION) $(QUAY_USER) $(QUAY_PASS) $(PLATFORMS) $(DOCKER_VERSION_ARG) $(DOCKERFILE_DIR)
 
 prepare: clean
 	./images/download_kafka.sh
