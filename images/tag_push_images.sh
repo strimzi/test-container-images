@@ -23,9 +23,7 @@ REGISTRY=$2
 REGISTRY_ORGANIZATION=$3
 QUAY_USER=$4
 QUAY_PASS=$5
-PLATFORMS=$6
-DOCKER_VERSION_ARG=$7
-DOCKERFILE_DIR=$8
+ARCHITECTURES=$6
 
 # PRINT ALL IMAGES
 docker images
@@ -33,15 +31,23 @@ docker images
 echo "Login into registry..."
 docker login -u $QUAY_USER -p $QUAY_PASS $REGISTRY
 
-docker buildx create --use
-
 #####
 # FOR EACH KAFKA VERSION TAG AND PUSH IMAGE
 #####
 for KAFKA_VERSION in $KAFKA_VERSIONS
 do
     CURRENT_TAG="$PRODUCT_VERSION-kafka-$KAFKA_VERSION"
-    echo "[INFO] Building and pushing images with following setup: DOCKER_VERSION_ARG=$DOCKER_VERSION_ARG, PROJECT_NAME=$PROJECT_NAME, PRODUCT_VERSION=$PRODUCT_VERSION, DOCKERFILE_DIR=$DOCKERFILE_DIR"
-    echo "[INFO] Building and pushing image with name: $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG $KAFKA_VERSION with $SCALA_VERSION)."
-    docker buildx build --push --platform=$PLATFORMS --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION --tag $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG $DOCKERFILE_DIR
+    echo "[INFO] Delete the manifest to the registry, ignore the error if manifest doesn't exist"
+	docker manifest rm $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG || true
+    for ARCH in $ARCHITECTURES
+    do
+        echo "[INFO] Tagging strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH to $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG-$ARCH ..."
+        docker tag strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG-$ARCH
+        echo "[INFO] Pushing image with name: $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG-$ARCH ..."
+	    docker push $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG-$ARCH
+        echo "[INFO] Create / Amend the manifest"
+	    docker manifest create $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG --amend $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG-$ARCH
+    done
+    echo "[INFO] Push the manifest to the registry"
+	docker manifest push $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
 done
