@@ -4,7 +4,7 @@
 # Test container images
 
 This repository contains code to compile the image used in the [strimzi/test-container](https://github.com/strimzi/test-container) repository. 
-The overall workflow is that if a new version of Kafka is published using `build_pipeline`, we release a brand new image with Kafka version containing Kafka binaries.
+The overall workflow is that if a new version of [Apache Kafka®](https://kafka.apache.org) is published using `build_pipeline`, we release a brand new image with Kafka version containing Kafka binaries.
 Moreover, the image can be used in other forms of deployment using a classic `docker` container or `docker-compose`.
 
 # How to use
