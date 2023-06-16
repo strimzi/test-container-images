@@ -23,7 +23,16 @@ do
     echo "Downloading: "$KAFKA_VERSION" with $SCALA_VERSION."
     KAFKA_URL="https://dlcdn.apache.org/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
     echo $KAFKA_URL
-    mkdir -p $KAFKA_DOWNLOADED_TARS_DIR && wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
+    mkdir -p $KAFKA_DOWNLOADED_TARS_DIR
+
+    if wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
+    then
+      echo "We successfully download Kafka from $KAFKA_URL"
+    else
+      echo "There was a problem downloading Kafka from $KAFKA_URL, we are gonna download it from archives."
+      KAFKA_URL="https://archive.apache.org/dist/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
+      wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
+    fi
     echo "kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
 
     echo "[INFO] Expected Kafka SHA512SUM:"
