@@ -20,34 +20,20 @@ SCALA_VERSION=$(cat supported_scala.version)
 #####
 for KAFKA_VERSION in $KAFKA_VERSIONS
 do
-
-    mkdir -p $KAFKA_DOWNLOADED_TARS_DIR
+    echo "Downloading: "$KAFKA_VERSION" with $SCALA_VERSION."
     KAFKA_URL="https://dlcdn.apache.org/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
     echo $KAFKA_URL
-    echo "Downloading: "$KAFKA_VERSION" with $SCALA_VERSION."
+    mkdir -p $KAFKA_DOWNLOADED_TARS_DIR
 
     if wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
     then
-        echo "We successfully download Kafka from $KAFKA_URL"
+      echo "We successfully download Kafka from $KAFKA_URL"
     else
-        echo "There was a problem downloading Kafka from $KAFKA_URL, we are gonna download it from archives."
-        KAFKA_URL="https://archive.apache.org/dist/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
-
-        if wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
-        then
-            echo "We successfully download Kafka from $KAFKA_URL"
-        else
-            echo "There was a problem downloading Kafka from $KAFKA_URL, we are gonna download it from release candidate."
-            KAFKA_URL="https://home.apache.org/~satishd/kafka-$KAFKA_VERSION-rc0/kafka_2.13-$KAFKA_VERSION.tgz"
-            if wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
-            then
-                echo "We successfully download Kafka from $KAFKA_URL"
-            else
-                echo "There was a problem downloading Kafka from $KAFKA_URL. Check if such URL is correct."
-            fi
-        echo "kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
-        fi
+      echo "There was a problem downloading Kafka from $KAFKA_URL, we are gonna download it from archives."
+      KAFKA_URL="https://archive.apache.org/dist/kafka/$KAFKA_VERSION/kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
+      wget $KAFKA_URL -P "$KAFKA_DOWNLOADED_TARS_DIR"
     fi
+    echo "kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz"
 
     echo "[INFO] Expected Kafka SHA512SUM:"
     EXCEPTED_KAFKA_SHA512SUM=$(cat "$CHECKSUMS_DIR/kafka_$SCALA_VERSION-$KAFKA_VERSION.sha512")
