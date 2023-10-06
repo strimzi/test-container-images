@@ -23,6 +23,9 @@ PROJECT_NAME=$2
 DOCKERFILE_DIR=$3
 ARCHITECTURES=$4
 
+# PRINT ALL IMAGES
+docker images
+
 #####
 # FOR EACH KAFKA VERSION BUILD IMAGE WITH DIFFERENT TAG (i.e., 'strimzi-test-container/test-container:0.1.0-kafka-2.8.1)
 #####
