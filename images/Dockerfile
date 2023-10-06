@@ -1,13 +1,9 @@
-FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+FROM strimzi/base:latest
 
 ARG KAFKA_VERSION
 ARG SCALA_VERSION
 
 USER root
-
-RUN microdnf update \
-    && microdnf install java-11-openjdk-headless shadow-utils \
-    && microdnf clean all
 
 # Add strimzi user with UID 1001
 # The user is in the group 0 to have access to the mounted volumes and storage
