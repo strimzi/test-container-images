@@ -16,7 +16,7 @@ CURRENT_TAG=${CURRENT_TAG:-"latest"}
 for ARCH in $ARCHITECTURES
 do
     echo "[INFO] Building image with name: strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG-$ARCH)."
-    docker build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG -t strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG-$ARCH $DOCKERFILE_BASE_DIR
+    docker build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG -t strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG $DOCKERFILE_BASE_DIR
 done
 
 # PRINT ALL IMAGES
