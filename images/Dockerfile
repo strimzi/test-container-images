@@ -1,4 +1,6 @@
-FROM strimzi/base:latest
+ARG ARCH=${ARCH}
+
+FROM strimzi/base:latest-$ARCH
 
 ARG KAFKA_VERSION
 ARG SCALA_VERSION
