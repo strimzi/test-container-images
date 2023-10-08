@@ -23,6 +23,9 @@ PROJECT_NAME=$2
 DOCKERFILE_DIR=$3
 ARCHITECTURES=$4
 
+# PRINT ALL IMAGES
+docker images
+
 #####
 # FOR EACH KAFKA VERSION BUILD IMAGE WITH DIFFERENT TAG (i.e., 'strimzi-test-container/test-container:0.1.0-kafka-2.8.1)
 #####
@@ -34,7 +37,7 @@ do
     for ARCH in $ARCHITECTURES
     do
         echo "[INFO] Building image with name: strimzi-test-container/$PROJECT_NAME:$CURRENT_TAG-$ARCH $KAFKA_VERSION with $SCALA_VERSION)."
-        docker build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION -t strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH $DOCKERFILE_DIR
+        docker build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION --build-arg ARCH=$ARCH -t strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH $DOCKERFILE_DIR
     done
 done
 
