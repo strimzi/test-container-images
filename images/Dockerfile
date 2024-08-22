@@ -14,7 +14,7 @@ RUN useradd -r -m -u 1001 -g 0 strimzi
 #####
 # Set JAVA_HOME env var
 #####
-ENV JAVA_HOME /usr/lib/jvm/jre-11
+ENV JAVA_HOME /usr/lib/jvm/jre-17
 #####
 # Add Kafka
 #####
