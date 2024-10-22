@@ -22,9 +22,10 @@ DOCKER_VERSION_ARG=$1
 PROJECT_NAME=$2
 DOCKERFILE_DIR=$3
 ARCHITECTURES=$4
+DOCKER_CMD=$5
 
 # PRINT ALL IMAGES
-docker images
+$DOCKER_CMD images
 
 #####
 # FOR EACH KAFKA VERSION BUILD IMAGE WITH DIFFERENT TAG (i.e., 'strimzi-test-container/test-container:0.1.0-kafka-2.8.1)
