@@ -27,6 +27,14 @@ ENV SCALA_VERSION=${SCALA_VERSION}
 
 COPY ./kafka_binaries/kafka_${SCALA_VERSION}\-${KAFKA_VERSION} $KAFKA_HOME
 
+# Copy OAuth libraries into $KAFKA_HOME/libs/ after copying Kafka binaries
+RUN if [ -d "/opt/kafka/oauth-libs" ]; then \
+        echo "Including OAuth libraries in the derived image..."; \
+        cp -r /opt/kafka/oauth-libs/* $KAFKA_HOME/libs/; \
+    else \
+        echo "OAuth libraries not found in base image. Skipping OAuth libraries in the derived image."; \
+    fi
+
 WORKDIR $KAFKA_HOME
 
 USER 1001
