@@ -38,7 +38,7 @@ do
     for ARCH in $ARCHITECTURES
     do
         echo "[INFO] Building image with name: strimzi-test-container/$PROJECT_NAME:$CURRENT_TAG-$ARCH $KAFKA_VERSION with $SCALA_VERSION)."
-        docker build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION --build-arg ARCH=$ARCH -t strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH $DOCKERFILE_DIR
+        $DOCKER_CMD build --platform linux/$ARCH --build-arg version=$DOCKER_VERSION_ARG --build-arg KAFKA_VERSION=$KAFKA_VERSION --build-arg SCALA_VERSION=$SCALA_VERSION --build-arg ARCH=$ARCH -t strimzi/$PROJECT_NAME:$CURRENT_TAG-$ARCH $DOCKERFILE_DIR
     done
 done
 
