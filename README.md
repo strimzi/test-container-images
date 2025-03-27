@@ -1,5 +1,9 @@
+[![Build Status](https://dev.azure.com/cncf/strimzi/_apis/build/status/test-container-images?branchName=main)](https://dev.azure.com/cncf/strimzi/_build/latest?definitionId=43&branchName=main)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![Twitter Follow](https://img.shields.io/twitter/follow/strimziio.svg?style=social&label=Follow&style=for-the-badge)](https://twitter.com/strimziio)
+[![GitHub release](https://img.shields.io/github/release/strimzi/test-container-images.svg)](https://github.com/strimzi/test-container-images/releases/latest)
+[![Pull Requests](https://img.shields.io/github/issues-pr/strimzi/test-container-images)](https://github.com/strimzi/test-container-images/pulls)
+[![Issues](https://img.shields.io/github/issues/strimzi/test-container-images)](https://github.com/strimzi/test-container-images/issues)
+[![Twitter Follow](https://img.shields.io/twitter/follow/strimziio?style=social)](https://twitter.com/strimziio)
 
 # Test container images
 
