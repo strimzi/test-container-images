@@ -1,0 +1,32 @@
+name: "Prepare Kafka Binaries"
+description: "Download and cache Kafka binaries"
+
+inputs:
+  runnerArch:
+    description: "Architecture of GitHub runner"
+    required: false
+    default: "amd64"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Kafka binaries
+      id: cache-kafka
+      uses: actions/cache@v4
+      with:
+        path: images/kafka_binaries
+        key: kafka-binaries-v3-${{ hashFiles('supported_kafka.versions', 'supported_scala.version') }}
+    
+    - name: Download Kafka binaries
+      if: steps.cache-kafka.outputs.cache-hit != 'true'
+      shell: bash
+      run: make prepare
+    
+    - name: Upload Kafka binaries artifact
+      uses: actions/upload-artifact@v5
+      with:
+        name: kafka-binaries
+        path: images/kafka_binaries/
+        retention-days: 1
+
+# Made with Bob
