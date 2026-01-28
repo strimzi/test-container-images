@@ -23,6 +23,10 @@ runs:
         name: kafka-binaries
         path: images/kafka_binaries/
 
+    - name: Restore execute permissions on Kafka scripts
+      shell: bash
+      run: chmod -R +x images/kafka_binaries/*/bin/
+
     - name: Build base images
       shell: bash
       run: make docker_prepare_base_images
