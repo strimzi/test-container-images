@@ -25,7 +25,7 @@ runs:
 
     - name: Extract Kafka binaries
       shell: bash
-      run: tar -xzf kafka-binaries.tar.gz
+      run: tar -xzf kafka-binaries.tar.gz -C images
 
     - name: Build base images
       shell: bash
