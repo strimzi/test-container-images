@@ -22,11 +22,12 @@ runs:
       shell: bash
       run: make prepare
     
+    - name: Create tar archive of Kafka binaries
+      shell: bash
+      run: tar -czf kafka-binaries.tar.gz -C images kafka_binaries
+    
     - name: Upload Kafka binaries artifact
       uses: actions/upload-artifact@v5
       with:
-        name: kafka-binaries
-        path: images/kafka_binaries/
-        retention-days: 1
-
-# Made with Bob
+        name: kafka-binaries.tar.gz
+        path: kafka-binaries.tar.gz

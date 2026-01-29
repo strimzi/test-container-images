@@ -2,3 +2,9 @@
 
 # MacOS related
 .DS_Store
+
+# Build artifacts
+images/kafka_binaries/
+images/kafka_tars/
+images/base/strimzi_base_*.tar
+container-archives/

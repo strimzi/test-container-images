@@ -24,8 +24,8 @@ do
                     -t strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG-$ARCH $DOCKERFILE_BASE_DIR
 
     # "refresh" Docker's awareness of the image
-    $DOCKER_CMD save strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG-$ARCH -o strimzi_base_$ARCH.tar
-    $DOCKER_CMD load -i strimzi_base_$ARCH.tar
+    $DOCKER_CMD save strimzi/$PROJECT_NAME_BASE:$CURRENT_TAG-$ARCH -o $DOCKERFILE_BASE_DIR/strimzi_base_$ARCH.tar
+    $DOCKER_CMD load -i $DOCKERFILE_BASE_DIR/strimzi_base_$ARCH.tar
     # tagging this image eliminate this error
     #  ```
     #      ERROR: failed to solve: strimzi/base:local: pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
