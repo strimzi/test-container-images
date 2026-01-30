@@ -20,12 +20,12 @@ runs:
     - name: Download Kafka binaries artifact
       uses: actions/download-artifact@v7
       with:
-        name: kafka-binaries
-        path: images/kafka_binaries/
+        name: kafka-binaries.tar.gz
+        path: .
 
-    - name: Restore execute permissions on Kafka scripts
+    - name: Extract Kafka binaries
       shell: bash
-      run: chmod -R +x images/kafka_binaries/*/bin/
+      run: tar -xzf kafka-binaries.tar.gz -C images
 
     - name: Build base images
       shell: bash
