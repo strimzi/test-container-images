@@ -6,6 +6,9 @@ inputs:
     description: "Architecture of GitHub runner"
     required: false
     default: "amd64"
+  artifactSuffix:
+    description: "Suffix of archive with images"
+    required: true
 
 runs:
   using: "composite"
@@ -24,10 +27,10 @@ runs:
     
     - name: Create tar archive of Kafka binaries
       shell: bash
-      run: tar -czf kafka-binaries.tar.gz -C images kafka_binaries
+      run: tar -czf binaries-${{ artifactSuffix }}.tar images/kafka_binaries
     
     - name: Upload Kafka binaries artifact
       uses: actions/upload-artifact@v5
       with:
-        name: kafka-binaries.tar.gz
-        path: kafka-binaries.tar.gz
+        name: binaries-${{ artifactSuffix }}.tar
+        path: binaries-${{ artifactSuffix }}.tar
