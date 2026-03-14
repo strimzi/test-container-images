@@ -53,7 +53,7 @@ jobs:
           fi
 
           echo "Binaries artifact contents:"
-          tar -tf binaries-${{ inputs.artifactSuffix }}.tar
+          tar -tf binaries-test-container-images.tar
           echo "✓ Binaries artifact created successfully"
 
   test-build-containers:
@@ -83,7 +83,7 @@ jobs:
 
       - uses: ./.github/actions/build/build-containers
         with:
-          architecture: ${{ matrix.architecture }}
+          architecture: "amd64"
           artifactSuffix: "test-container-images"
           containerRegistry: "quay.io"
           containerOrg: "strimzi"
@@ -129,4 +129,4 @@ jobs:
           registryPassword: "strimzi"
           containerRegistry: "registry.strimzi:443"
           architectures: "amd64"
-          artifactSuffix: ${{ inputs.artifactSuffix }}
+          artifactSuffix: "test-container-images"
