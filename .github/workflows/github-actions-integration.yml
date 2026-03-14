@@ -1,0 +1,132 @@
+name: GitHub Actions Integration
+
+on:
+  pull_request:
+    paths:
+      - 'Makefile'
+      - 'Makefile.os'
+      - 'Makefile.docker'
+      - '.github/workflows/github-actions-integration.yml'
+    branches:
+      - "*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Declare default permissions as read only
+permissions:
+  contents: read
+  id-token: write  # Required for OIDC keyless signing
+
+jobs:
+  test-prepare-binaries:
+    name: Prepare Binaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Checkout github-actions
+        uses: actions/checkout@v6
+        with:
+          repository: strimzi/github-actions
+          ref: "v1"
+          path: github-actions
+
+      - name: Setup actions for testing
+        run: |
+          mkdir -p .github/actions
+          cp -r github-actions/.github/actions/* .github/actions/
+
+      - name: Setup Java and Maven
+        uses: ./.github/actions/build/prepare-kafka
+        with:
+          artifactSuffix: "test-container-images"
+
+      - name: Verify binaries artifact was created
+        run: |
+          if [ ! -f "binaries-test-container-images.tar" ]; then
+            echo "❌ Binaries artifact not created"
+            exit 1
+          fi
+
+          echo "Binaries artifact contents:"
+          tar -tf binaries-${{ inputs.artifactSuffix }}.tar
+          echo "✓ Binaries artifact created successfully"
+
+  test-build-containers:
+    name: Build Containers
+    needs:
+      - test-prepare-binaries
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Checkout github-actions
+        uses: actions/checkout@v6
+        with:
+          repository: strimzi/github-actions
+          ref: "v1"
+          path: github-actions
+
+      - name: Setup actions for testing
+        run: |
+          mkdir -p .github/actions
+          cp -r github-actions/.github/actions/* .github/actions/
+
+      - name: Install Docker
+        uses: ./.github/actions/dependencies/install-docker
+
+      - uses: ./.github/actions/build/build-containers
+        with:
+          architecture: ${{ matrix.architecture }}
+          artifactSuffix: "test-container-images"
+          containerRegistry: "quay.io"
+          containerOrg: "strimzi"
+          containerTag: "latest"
+          imagesDir: "./container-archives"
+
+  test-push-containers:
+    name: Push Containers
+    needs:
+      - test-build-containers
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Checkout github-actions
+        uses: actions/checkout@v6
+        with:
+          repository: strimzi/github-actions
+          ref: "v1"
+          path: github-actions
+
+      - name: Setup actions for testing
+        run: |
+          mkdir -p .github/actions
+          cp -r github-actions/.github/actions/* .github/actions/
+
+      - name: Setup local registry
+        run: github-actions/.github/tests/setup-registry.sh
+        env:
+          REGISTRY_IMAGE: "registry:3"
+          REGISTRY_USERNAME: "strimzi"
+          REGISTRY_PASSWORD: "strimzi"
+
+      - name: Install Docker
+        uses: ./.github/actions/dependencies/install-docker
+
+      - name: Push containers using push-containers action
+        uses: ./.github/actions/build/push-containers
+        with:
+          registryUser: "strimzi"
+          registryPassword: "strimzi"
+          containerRegistry: "registry.strimzi:443"
+          architectures: "amd64"
+          artifactSuffix: ${{ inputs.artifactSuffix }}
