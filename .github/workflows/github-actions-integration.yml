@@ -3,6 +3,7 @@ name: GitHub Actions Integration
 on:
   pull_request:
     paths:
+      - '**/Dockerfile'
       - 'Makefile'
       - 'Makefile.os'
       - 'Makefile.docker'
@@ -27,18 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Checkout github-actions
-        uses: actions/checkout@v6
-        with:
-          repository: strimzi/github-actions
-          ref: "v1"
-          path: github-actions
-
-      - name: Setup actions for testing
-        run: |
-          mkdir -p .github/actions
-          cp -r github-actions/.github/actions/* .github/actions/
 
       - name: Setup Java and Maven
         uses: ./.github/actions/build/prepare-kafka
@@ -66,22 +55,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Checkout github-actions
-        uses: actions/checkout@v6
-        with:
-          repository: strimzi/github-actions
-          ref: "v1"
-          path: github-actions
-
-      - name: Setup actions for testing
-        run: |
-          mkdir -p .github/actions
-          cp -r github-actions/.github/actions/* .github/actions/
-
       - name: Install Docker
-        uses: ./.github/actions/dependencies/install-docker
+        uses: strimzi/github-actions/.github/actions/dependencies/install-docker@v1
 
-      - uses: ./.github/actions/build/build-containers
+      - uses: strimzi/github-actions/.github/actions/build/build-containers@v1
         with:
           architecture: "amd64"
           artifactSuffix: "test-container-images"
@@ -100,17 +77,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      # Checkout is needed for setup-registry.sh
       - name: Checkout github-actions
         uses: actions/checkout@v6
         with:
           repository: strimzi/github-actions
           ref: "v1"
           path: github-actions
-
-      - name: Setup actions for testing
-        run: |
-          mkdir -p .github/actions
-          cp -r github-actions/.github/actions/* .github/actions/
 
       - name: Setup local registry
         run: github-actions/.github/tests/setup-registry.sh
@@ -120,10 +93,10 @@ jobs:
           REGISTRY_PASSWORD: "strimzi"
 
       - name: Install Docker
-        uses: ./.github/actions/dependencies/install-docker
+        uses: strimzi/github-actions/.github/actions/dependencies/install-docker@v1
 
       - name: Push containers using push-containers action
-        uses: ./.github/actions/build/push-containers
+        uses: strimzi/github-actions/.github/actions/build/push-containers@v1
         with:
           registryUser: "strimzi"
           registryPassword: "strimzi"
