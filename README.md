@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/cncf/strimzi/_apis/build/status/test-container-images?branchName=main)](https://dev.azure.com/cncf/strimzi/_build/latest?definitionId=43&branchName=main)
+[![Build Status](https://github.com/strimzi/test-container-images/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/strimzi/test-container-images/actions/workflows/build.yml?query=branch%3Amain)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![GitHub release](https://img.shields.io/github/release/strimzi/test-container-images.svg)](https://github.com/strimzi/test-container-images/releases/latest)
 [![Pull Requests](https://img.shields.io/github/issues-pr/strimzi/test-container-images)](https://github.com/strimzi/test-container-images/pulls)
