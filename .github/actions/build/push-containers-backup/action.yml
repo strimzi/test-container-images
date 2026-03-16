@@ -1,0 +1,57 @@
+name: "Push Test Container Images"
+description: "Tag and push test container images to registry"
+
+inputs:
+  architectures:
+    description: "Space-separated list of architectures (e.g., 'amd64 arm64 s390x ppc64le')"
+    required: true
+  runnerArch:
+    description: "Runner architecture (amd64, arm64)"
+    required: false
+    default: "amd64"
+  quayUser:
+    description: "Quay.io username"
+    required: true
+  quayPass:
+    description: "Quay.io password"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Docker
+      uses: strimzi/strimzi-kafka-operator/.github/actions/dependencies/install-docker@main
+
+    - name: Download container artifacts
+      uses: actions/download-artifact@v7
+      with:
+        pattern: containers-*
+        path: ./
+        merge-multiple: true
+
+    - name: Extract and organize container archives
+      shell: bash
+      run: |
+        mkdir -p container-archives
+        mv *.tar.gz container-archives/ || true
+        ls -la container-archives/
+
+    - name: Load container images
+      shell: bash
+      run: make docker_load
+      env:
+        ARCHS: ${{ inputs.architectures }}
+
+    - name: Tag and push images
+      shell: bash
+      run: make docker_tag_push
+      env:
+        DOCKER_BUILDKIT: 1
+        QUAY_USER: ${{ inputs.quayUser }}
+        QUAY_PASS: ${{ inputs.quayPass }}
+        ARCHS: ${{ inputs.architectures }}
+
+    - name: List pushed images
+      if: ${{ always() }}
+      shell: bash
+      run: docker images -a
