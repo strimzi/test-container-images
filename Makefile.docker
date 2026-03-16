@@ -1,0 +1,154 @@
+# Makefile.docker contains the shared tasks for building, tagging and pushing Docker images.
+# This file is included into the Makefile files which contain the Dockerfile files.
+#
+# The DOCKER_ORG (default is name of the current user) and DOCKER_TAG (based on Git Tag,
+# default latest) variables are used to name the Docker image. DOCKER_REGISTRY identifies
+# the registry where the image will be pushed (default is Docker Hub). DOCKER_VERSION_ARG
+# is passed to the image build (based on Git commit, default latest)
+
+DOCKERFILE_DIR     ?= ./images
+DOCKER_REGISTRY    ?= quay.io
+DOCKER_ORG         ?= $(USER)
+DOCKER_TAG         ?= latest
+BUILD_TAG          ?= latest
+DOCKER_VERSION_ARG ?= latest
+DOCKER_CMD         ?= docker
+ARCHIVE_DIR        ?= ./container-archives
+SBOM_DIR           ?= ./sbom
+KAFKA_VERSIONS     = $(shell cat supported_kafka.versions)
+SCALA_VERSION      = $(shell cat supported_scala.version)
+
+DOCKER_ARCHITECTURE ?= amd64
+
+ifdef DOCKER_ARCHITECTURE
+  DOCKER_PLATFORM = --platform linux/$(DOCKER_ARCHITECTURE)
+  DOCKER_PLATFORM_TAG_SUFFIX = -$(DOCKER_ARCHITECTURE)
+endif
+
+MANIFEST_ARCHITECTURES ?= $(DOCKER_ARCHITECTURE)
+
+docker_prepare_base_images:
+	./images/base/build_base_images.sh $(DOCKER_VERSION_ARG) $(PROJECT_NAME_BASE) $(DOCKER_ARCHITECTURE) $(DOCKERFILE_BASE_DIR) $(DOCKER_CMD)
+
+prepare:
+	./images/download_kafka.sh
+
+.PHONY: docker_build
+docker_build: docker_prepare_base_images
+	$(MAKE) execute_docker_goal goal=docker_build_goal
+
+.PHONY: docker_build_goal
+docker_build_goal:
+	@echo "Building Docker image for Kafka version $(KAFKA_VERSION)..."
+	$(DOCKER_CMD) build $(DOCKER_PLATFORM) --build-arg KAFKA_VERSION=$(KAFKA_VERSION) --build-arg SCALA_VERSION=$(SCALA_VERSION) --build-arg ARCH=$(DOCKER_ARCHITECTURE) -t strimzi/$(PROJECT_NAME):$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) -f $(DOCKERFILE_DIR)/Dockerfile $(DOCKERFILE_DIR)
+
+.PHONY: docker_tag
+docker_tag:
+	$(MAKE) execute_docker_goal goal=docker_tag_goal
+
+.PHONY: docker_tag_goal
+docker_tag_goal:
+	echo "Tagging strimzi/$(PROJECT_NAME):$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) to $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) ..."
+	$(DOCKER_CMD) tag strimzi/$(PROJECT_NAME):$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX)
+
+.PHONY: docker_push
+docker_push:
+	$(MAKE) execute_docker_goal goal=docker_push_goal
+
+.PHONY: docker_push_goal
+docker_push_goal:
+	echo "Pushing $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) ..."
+	$(DOCKER_CMD) push $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX)
+
+.PHONY: docker_save
+docker_save:
+	$(MAKE) execute_docker_goal goal=docker_save_goal
+
+.PHONY: docker_save_goal
+docker_save_goal:
+	# Saves the container as TGZ file
+	test -d $(ARCHIVE_DIR) || mkdir -p $(ARCHIVE_DIR)
+	$(DOCKER_CMD) save $(DOCKER_PLATFORM) strimzi/$(PROJECT_NAME):$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) | gzip > $(ARCHIVE_DIR)/$(PROJECT_NAME)-$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX).tar.gz
+
+.PHONY: docker_load
+docker_load:
+	$(MAKE) execute_docker_goal goal=docker_load_goal
+
+.PHONY: docker_load_goal
+docker_load_goal:
+	# Loads the container as TGZ file
+	docker load < $(ARCHIVE_DIR)/$(PROJECT_NAME)-$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX).tar.gz
+
+.PHONY: docker_delete_archive
+docker_delete_archive:
+	$(MAKE) execute_docker_goal goal=docker_delete_archive_goal
+
+.PHONY: docker_delete_archive_goal
+docker_delete_archive_goal:
+	# Deletes the archive
+	rm $(ARCHIVE_DIR)/$(PROJECT_NAME)-$(BUILD_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX).tar.gz
+
+.PHONY: docker_amend_manifest
+docker_amend_manifest:
+	$(MAKE) execute_docker_goal goal=docker_amend_manifest_goal
+
+.PHONY: docker_amend_manifest_goal
+docker_amend_manifest_goal:
+	# Create the multi-platform manifest from architecture-specific images
+	sources="" ; \
+	for arch in $$(echo "$(MANIFEST_ARCHITECTURES)" | tr ',' ' '); do \
+		sources="$$sources $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)-$$arch" ; \
+	done ; \
+	$(DOCKER_CMD) buildx imagetools create -t $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG) $$sources
+
+.PHONY: docker_gha_sign_manifest
+docker_gha_sign_manifest:
+	$(MAKE) execute_docker_goal goal=docker_gha_sign_manifest_goal
+
+.PHONY: docker_gha_sign_manifest_goal
+docker_gha_sign_manifest_goal:
+	# Signs the manifest and its images using keyless signing (GitHub OIDC)
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG) --format '{{ json . }}' | jq -r .manifest.digest); \
+	cosign clean -f --type signature $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)@$$MANIFEST_DIGEST || true; \
+	cosign sign --yes --recursive --timeout 6m0s -a author=StrimziCI -a BuildID=$(BUILD_ID) -a Commit=$(BUILD_COMMIT) $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)@$$MANIFEST_DIGEST
+
+.PHONY: docker_gha_sbom
+docker_gha_sbom:
+	$(MAKE) execute_docker_goal goal=docker_gha_sbom_goal
+
+.PHONY: docker_gha_sbom_goal
+docker_gha_sbom_goal:
+	# Saves the SBOM of the image and signs with keyless signing
+	test -d $(SBOM_DIR) || mkdir -p $(SBOM_DIR)
+	# Generate the text format
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	syft packages $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)@$$MANIFEST_DIGEST --output syft-table --file $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.txt
+	# Generate the SPDX JSON format for machine processing
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	syft packages $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)@$$MANIFEST_DIGEST --output spdx-json --file $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.json
+	# Sign the TXT and SPDX-JSON SBOM with keyless signing
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	cosign sign-blob --yes --bundle $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.txt.bundle $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.txt
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	cosign sign-blob --yes --bundle $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.json.bundle $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.json
+
+.PHONY: docker_gha_push_sbom
+docker_gha_push_sbom:
+	$(MAKE) execute_docker_goal goal=docker_gha_push_sbom_goal
+
+.PHONY: docker_gha_push_sbom_goal
+docker_gha_push_sbom_goal:
+	# Push the SBOM to the container registry and sign it with keyless signing
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	cosign attach sbom --sbom $(SBOM_DIR)/$(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)/$(DOCKER_TAG)/$$MANIFEST_DIGEST.json $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX)
+	MANIFEST_DIGEST=$(shell docker buildx imagetools inspect $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME):$(DOCKER_TAG)$(DOCKER_PLATFORM_TAG_SUFFIX) --format '{{ json . }}' | jq -r .manifest.digest); \
+	cosign sign --yes -a author=StrimziCI -a BuildID=$(BUILD_ID) -a Commit=$(BUILD_COMMIT) --attachment sbom $(DOCKER_REGISTRY)/$(DOCKER_ORG)/$(PROJECT_NAME)@$$MANIFEST_DIGEST
+
+.PHONY: execute_docker_goal
+execute_docker_goal:
+# Goal for handling execution of specified goals for each Kafka version
+	@for version in $(KAFKA_VERSIONS); do \
+		$(MAKE) $(goal) KAFKA_VERSION=$$version \
+			DOCKER_TAG=$(DOCKER_TAG)-kafka-$$version \
+			BUILD_TAG=$(BUILD_TAG)-kafka-$$version; \
+	done
