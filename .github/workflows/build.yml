@@ -52,7 +52,7 @@ jobs:
           architecture: ${{ matrix.architecture }}
           artifactSuffix: "test-container-images"
           containerRegistry: "quay.io"
-          containerOrg: "strimzi"
+          containerOrg: "strimzi-test-container"
           containerTag: "latest"
           imagesDir: "./container-archives"
 
@@ -76,7 +76,7 @@ jobs:
         with:
           architectures: "amd64,arm64,ppc64le,s390x"
           containerRegistry: "quay.io"
-          containerOrg: "strimzi"
+          containerOrg: "strimzi-test-container"
           containerTag: "latest"
           registryUser: ${{ secrets.QUAY_USER }}
           registryPassword: ${{ secrets.QUAY_PASS }}
