@@ -63,7 +63,7 @@ jobs:
           architecture: "amd64"
           artifactSuffix: "test-container-images"
           containerRegistry: "quay.io"
-          containerOrg: "strimzi"
+          containerOrg: "strimzi-test-container"
           containerTag: "latest"
           imagesDir: "./container-archives"
 
