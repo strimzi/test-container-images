@@ -35,6 +35,8 @@ RUN if [ -d "/opt/kafka/oauth-libs" ]; then \
         echo "OAuth libraries not found in base image. Skipping OAuth libraries in the derived image."; \
     fi
 
+COPY ./connector_plugins/ $KAFKA_HOME/plugins/
+
 WORKDIR $KAFKA_HOME
 
 USER 1001

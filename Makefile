@@ -12,5 +12,6 @@ all: clean prepare docker_build
 clean:
 	rm -rf images/kafka_binaries || true
 	rm -rf images/kafka_tars || true
+	rm -rf images/connector_plugins || true
 	rm -rf images/base/strimzi_base_*.tar || true
 	rm -rf $(ARCHIVE_DIR) || true
