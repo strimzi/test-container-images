@@ -6,5 +6,6 @@
 # Build artifacts
 images/kafka_binaries/
 images/kafka_tars/
+images/connector_plugins/
 images/base/strimzi_base_*.tar
 container-archives/

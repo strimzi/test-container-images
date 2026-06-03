@@ -17,17 +17,19 @@ runs:
       id: cache-kafka
       uses: actions/cache@v4
       with:
-        path: images/kafka_binaries
-        key: kafka-binaries-v3-${{ hashFiles('supported_kafka.versions', 'supported_scala.version') }}
-    
-    - name: Download Kafka binaries
+        path: |
+          images/kafka_binaries
+          images/connector_plugins
+        key: kafka-binaries-v4-${{ hashFiles('supported_kafka.versions', 'supported_scala.version', 'test-connectors.version') }}
+
+    - name: Download Kafka binaries and connector plugins
       if: steps.cache-kafka.outputs.cache-hit != 'true'
       shell: bash
       run: make prepare
-    
-    - name: Create tar archive of Kafka binaries
+
+    - name: Create tar archive of Kafka binaries and connector plugins
       shell: bash
-      run: tar -czf binaries-${{ inputs.artifactSuffix }}.tar images/kafka_binaries
+      run: tar -czf binaries-${{ inputs.artifactSuffix }}.tar images/kafka_binaries images/connector_plugins
     
     - name: Upload Kafka binaries artifact
       uses: actions/upload-artifact@v5

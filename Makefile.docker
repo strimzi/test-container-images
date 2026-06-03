@@ -32,6 +32,7 @@ docker_prepare_base_images:
 
 prepare:
 	./images/download_kafka.sh
+	./images/download_connectors.sh
 
 .PHONY: docker_build
 docker_build: docker_prepare_base_images
