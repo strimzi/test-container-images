@@ -5,8 +5,6 @@ on:
     branches:
       - "main"
       - "release-*"
-    tags:
-      - "*"
   pull_request:
     branches:
       - "*"
@@ -20,64 +18,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  prepare:
-    name: Prepare Kafka Binaries
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/build/prepare-kafka
-        with:
-          runnerArch: "amd64"
-          artifactSuffix: "test-container-images"
-
-  build-containers:
-    name: Build Containers
-    needs:
-      - prepare
-    strategy:
-      matrix:
-        architecture:
-          - amd64
-          - arm64
-          - s390x
-          - ppc64le
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: strimzi/github-actions/.github/actions/dependencies/install-docker@v1
-
-      - uses: strimzi/github-actions/.github/actions/build/build-containers@v1
-        with:
-          architecture: ${{ matrix.architecture }}
-          artifactSuffix: "test-container-images"
-          containerRegistry: "quay.io"
-          containerOrg: "strimzi-test-container"
-          containerTag: "latest"
-          imagesDir: "./container-archives"
-
-  push-containers:
-    name: Push Containers
-    needs:
-      - build-containers
-    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') }}
-    permissions:
-      contents: read
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: strimzi/github-actions/.github/actions/dependencies/install-docker@v1
-
-      - uses: strimzi/github-actions/.github/actions/dependencies/install-syft@v1
-
-      - uses: strimzi/github-actions/.github/actions/build/push-containers@v1
-        with:
-          architectures: "amd64,arm64,ppc64le,s390x"
-          containerRegistry: "quay.io"
-          containerOrg: "strimzi-test-container"
-          containerTag: "latest"
-          registryUser: ${{ secrets.QUAY_USER }}
-          registryPassword: ${{ secrets.QUAY_PASS }}
-          artifactSuffix: "test-container-images"
+  build:
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      containerTag: "latest"
+    secrets:
+      QUAY_USER: ${{ secrets.QUAY_USER }}
+      QUAY_PASS: ${{ secrets.QUAY_PASS }}
