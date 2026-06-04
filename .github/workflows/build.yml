@@ -22,7 +22,6 @@ jobs:
     uses: ./.github/workflows/reusable-build.yml
     with:
       containerTag: "latest"
-      pushContainers: ${{ github.ref == 'refs/heads/main' }}
     secrets:
       QUAY_USER: ${{ secrets.QUAY_USER }}
       QUAY_PASS: ${{ secrets.QUAY_PASS }}

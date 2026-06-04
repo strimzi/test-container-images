@@ -8,11 +8,6 @@ on:
         required: false
         type: string
         default: 'latest'
-      pushContainers:
-        description: 'Whether to push containers to the registry'
-        required: false
-        type: boolean
-        default: false
     secrets:
       QUAY_USER:
         required: false
@@ -64,7 +59,7 @@ jobs:
     name: Push Containers
     needs:
       - build-containers
-    if: ${{ inputs.pushContainers }}
+    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release-') }}
     permissions:
       contents: read
       id-token: write
