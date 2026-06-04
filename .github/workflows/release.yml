@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   release:
-    if: ${{ startsWith(github.ref, 'refs/heads/release-') }}
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
     uses: ./.github/workflows/reusable-build.yml
     with:
       containerTag: ${{ inputs.releaseVersion }}
