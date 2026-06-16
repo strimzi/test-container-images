@@ -65,8 +65,7 @@ git push upstream release-0.116.x
 cd test-container
 git checkout release-0.116.x
 
-export RELEASE_VERSION=0.116.0
-make release_maven release_json
+RELEASE_VERSION=0.116.0 make release_maven release_json
 
 git add pom.xml src/main/resources/kafka_versions.json
 git commit -m "Set version to 0.116.0"
