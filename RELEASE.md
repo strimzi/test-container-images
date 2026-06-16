@@ -7,15 +7,12 @@ The release always starts here.
 ## Overview
 
 Both projects use a **branch-based release strategy** with `release-*` branches.
-The process goes: publish RC images, validate them via the test-container test suite, then publish GA images and the Maven artifact.
+The process goes: build and publish RC images, release an RC of the Java library, 
+announce the RC for community testing, and once approved, build and publish the GA images and the Maven artifact.
 
 ## Prerequisites
 
 - Write access to both `strimzi/test-container-images` and `strimzi/test-container`
-- A `release-*` branch in each repository (e.g., `release-0.116.x`)
-- Repository secrets configured:
-  - **test-container-images:** `QUAY_USER`, `QUAY_PASS` (Quay.io registry)
-  - **test-container:** `GPG_PASSPHRASE`, `GPG_SIGNING_KEY`, `CENTRAL_USERNAME`, `CENTRAL_PASSWORD` (Maven Central)
 
 ## Version Files (test-container-images)
 
@@ -68,10 +65,8 @@ git push upstream release-0.116.x
 cd test-container
 git checkout release-0.116.x
 
-# Update the version in pom.xml from SNAPSHOT to GA
-mvn versions:set -DnewVersion=0.116.0 -DgenerateBackupPoms=false
-
-# Update kafka_versions.json if needed (e.g., add/remove Kafka versions)
+export RELEASE_VERSION=0.116.0
+make release_maven release_json
 
 git add pom.xml src/main/resources/kafka_versions.json
 git commit -m "Set version to 0.116.0"
@@ -122,7 +117,7 @@ quay.io/strimzi-test-container/test-container:0.116.0-rc1-kafka-4.2.1
 quay.io/strimzi-test-container/test-container:0.116.0-rc1-kafka-4.3.0
 ```
 
-### 5. Validate RC images in test-container
+### 5. Release RC of test-container
 
 Trigger the **Release** workflow in `strimzi/test-container` with the RC version.
 The release workflow sets the version in `pom.xml` and updates `kafka_versions.json` to use the RC-tagged images automatically, then runs the full build including integration tests:
@@ -175,7 +170,7 @@ Then announce the RC:
 
 ### 6. Release GA images from test-container-images
 
-Once RC validation passes, trigger the **Release** workflow again with the GA version:
+Once the RC has been tested and approved by the community, trigger the **Release** workflow again with the GA version:
 
 ```bash
 gh workflow run release.yml \
