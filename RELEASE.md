@@ -51,23 +51,22 @@ Make sure the version you reference is already published on [Maven Central](http
 
 ### 1. Create release branches (if they do not exist)
 
-Create a release branch in **both** repositories:
+Create a release branch from `main` in **both** `strimzi/test-container-images` and `strimzi/test-container`.
 
-```bash
-# test-container-images
-cd test-container-images
-git checkout main
-git pull upstream main  # upstream = git@github.com:strimzi/test-container-images.git
-git checkout -b release-0.116.x
-git push upstream release-0.116.x
+#### Branch naming convention
 
-# test-container
-cd ../test-container
-git checkout main
-git pull upstream main  # upstream = git@github.com:strimzi/test-container.git
-git checkout -b release-0.116.x
-git push upstream release-0.116.x
-```
+Release branches follow the pattern `release-<major>.<minor>.x`, where the `.x` suffix allows for patch releases from the same branch. 
+The major and minor version numbers match the release version you are preparing. 
+For example:
+
+| Release version |                                   Branch name |
+|-----------------|----------------------------------------------:|
+| `0.116.0`       |                             `release-0.116.x` |
+| `0.117.0`       |                             `release-0.117.x` |
+| `0.116.1`       | `release-0.116.x` (reuse the existing branch) |
+
+For a new minor release, create a fresh branch from the tip of `main` in both repositories and push it to the upstream remote.
+For a patch release, the branch already exists, so skip this step.
 
 ### 2. Prepare the release branches
 
