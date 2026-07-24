@@ -10,6 +10,20 @@ Both projects use a **branch-based release strategy** with `release-*` branches.
 The process goes: build and publish RC images, release an RC of the Java library, 
 announce the RC for community testing, and once approved, build and publish the GA images and the Maven artifact.
 
+### Quick checklist
+
+At a high level, the release follows these steps:
+
+1. **Create release branches** in both repositories
+2. **Prepare version files** (Kafka versions, connectors, pom.xml)
+3. **Wait for CI** to pass on both release branches
+4. **Build and publish RC images** from this repo
+5. **Release RC of the Java library** and publish to Maven Central
+6. **Announce the RC** to the community and wait for feedback
+7. **Build and publish GA images** once the RC is approved
+8. **Release GA of the Java library** and publish to Maven Central
+9. **Post-release:** verify artifacts, create GitHub releases, bump SNAPSHOT version
+
 ## Prerequisites
 
 - Write access to both `strimzi/test-container-images` and `strimzi/test-container`
@@ -217,6 +231,7 @@ git push upstream 0.116.0
 
 ### 8. Post-release
 
+- Verify the GA images are available on [Quay.io](https://quay.io/organization/strimzi-test-container)
 - Verify the Maven artifact is available on [Maven Central](https://central.sonatype.com/artifact/io.strimzi/strimzi-test-container)
 - Create GitHub releases in both repositories
 - Bump the SNAPSHOT version on `main` in `strimzi/test-container` if needed
