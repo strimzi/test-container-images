@@ -39,3 +39,21 @@ docker tag strimzi/$PROJECT_NAME:$CURRENT_TAG $REGISTRY/$REGISTRY_ORGANIZATION/$
 // push image
 docker push $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
 ```
+
+## Artifact attestations
+
+Strimzi Test Container images container images are published with [GitHub artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) containing [SLSA build provenance](https://slsa.dev/provenance/v1) and, for container images, an [SPDX](https://spdx.dev/) SBOM.
+The attestations are signed keylessly with [Sigstore](https://www.sigstore.dev/) using the GitHub Actions OIDC identity, so no public key is needed to verify them.
+You can verify them with the [GitHub CLI](https://cli.github.com/).
+
+To verify the build provenance of a container image:
+
+```
+gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version> --repo strimzi/test-container-images
+```
+
+To verify the SBOM attestation of a container image:
+
+```
+gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version> --repo strimzi/test-container-images --predicate-type https://spdx.dev/Document/v2.3
+```
