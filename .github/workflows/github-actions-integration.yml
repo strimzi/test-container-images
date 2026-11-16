@@ -105,6 +105,12 @@ jobs:
       - name: Install Docker
         uses: strimzi/github-actions/.github/actions/dependencies/install-docker@bb4758d4afacd9c0ff8f426395bbbece41fd142a # v4.0
 
+      # Needed for SBOM generation in push-containers, which runs on non-PR events (e.g. push to main)
+      - name: Install Syft
+        uses: strimzi/github-actions/.github/actions/dependencies/install-syft@bb4758d4afacd9c0ff8f426395bbbece41fd142a # v4.0
+        with:
+          version: "1.57.1"
+
       - name: Push containers using push-containers action
         uses: strimzi/github-actions/.github/actions/build/push-containers@bb4758d4afacd9c0ff8f426395bbbece41fd142a # v4.0
         with:
