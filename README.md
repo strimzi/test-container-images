@@ -42,18 +42,20 @@ docker push $REGISTRY/$REGISTRY_ORGANIZATION/$PROJECT_NAME:$CURRENT_TAG
 
 ## Artifact attestations
 
-Strimzi Test Container images container images are published with [GitHub artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) containing [SLSA build provenance](https://slsa.dev/provenance/v1) and, for container images, an [SPDX](https://spdx.dev/) SBOM.
+Strimzi Test Container container images are published with [GitHub artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) containing [SLSA build provenance](https://slsa.dev/provenance/v1) and, for container images, an [SPDX](https://spdx.dev/) SBOM.
 The attestations are signed keylessly with [Sigstore](https://www.sigstore.dev/) using the GitHub Actions OIDC identity, so no public key is needed to verify them.
+They are created by the shared [Strimzi GitHub Actions](https://github.com/strimzi/github-actions) workflows, so the `--signer-repo strimzi/github-actions` option is required when verifying them.
 You can verify them with the [GitHub CLI](https://cli.github.com/).
 
+Container images are attested per architecture, so use the architecture-specific tag (for example `-amd64`, `-arm64`, `-ppc64le` or `-s390x`) or its digest instead of the multi-architecture tag.
 To verify the build provenance of a container image:
 
 ```
-gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version> --repo strimzi/test-container-images
+gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version>-amd64 --repo strimzi/test-container-images --signer-repo strimzi/github-actions
 ```
 
 To verify the SBOM attestation of a container image:
 
 ```
-gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version> --repo strimzi/test-container-images --predicate-type https://spdx.dev/Document/v2.3
+gh attestation verify oci://quay.io/strimzi-test-container/test-container:<version>-kafka-<kafka-version>-amd64 --repo strimzi/test-container-images --signer-repo strimzi/github-actions --predicate-type https://spdx.dev/Document/v2.3
 ```
