@@ -34,7 +34,8 @@ jobs:
   test-prepare-binaries:
     name: Prepare Binaries
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Versions no longer on dlcdn come from archive.apache.org, which serves ~80 KB/s (~30 min per Kafka tgz) on a cache miss
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
